@@ -1,0 +1,27 @@
+{
+  "name": "hayabusa_Mastodon_client",
+  "version": "0.1.0",
+  "description": "Simple Mastodon Client",
+  "main": "main.js",
+  "dependencies": {
+    "node-fetch": "^1.7.3",
+    "websocket": "^1.0.25"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hs-sh-net/mastodon-client"
+  },
+  "keywords": [
+    "Mastodon-Bot"
+  ],
+  "author": "hayabusa",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/hs-sh-net/mastodon-client/issues"
+  },
+  "homepage": "https://github.com/hs-sh-net/mastodon-client"
+}
