@@ -24,13 +24,13 @@ let visibility = "public";
 
 let msg = {
     content: function(content){ return content.replace(/<br \/>/,'\n')
-                                                       .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
-                                                       .replace(/(&lt;)/g, '<')
-                                                       .replace(/(&gt;)/g, '>')
-                                                       .replace(/(&quot;)/g, '"')
-                                                       .replace(/(&#39;)/g, "'")
-                                                       .replace(/(&amp;)/g, '&')
-                                                       .replace(/(&apos;)/g, '\'')},
+                                              .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
+                                              .replace(/(&lt;)/g, '<')
+                                              .replace(/(&gt;)/g, '>')
+                                              .replace(/(&quot;)/g, '"')
+                                              .replace(/(&#39;)/g, "'")
+                                              .replace(/(&amp;)/g, '&')
+                                              .replace(/(&apos;)/g, '\'')},
     notify:  function(display_name, acct, type, content=''){ return "\x1b[G\x1b[44m" + display_name + " @" + acct + "が\x1b[5m " + type + " \x1b[0m\x1b[44mしました" + (content && ": \n"+content) + "\x1b[0m"},
     footer:  function(id, created_at) { return "\x1b[G\x1b[47m\x1b[30m " + created_at + ' '.repeat(process.stdout.columns - created_at.length - id.toString().length -2) + id + " \x1b[0m"}
 };
@@ -86,7 +86,7 @@ function input() {
             console.log("\x1b[G > set vis <direct|private|unlisted|public>");
             console.log("\x1b[G > pause");
         } else {
-          console.log("\x1b[G\x1b[41m不明なコマンドです\x1b[49m");
+            console.log("\x1b[G\x1b[41m不明なコマンドです\x1b[49m");
         }
         reader.prompt(true);
     });
@@ -130,7 +130,6 @@ let onConnect = function(connection, thisConnection) {
                 if(Active == thisConnection){
                     if (event == "delete") {
                         console.log("\x1b[G\x1b[45m" + json + "番のTootが削除されました" + "\x1b[0m");
-
                     } else if (event == "update") {
                         // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                         if (list.max_id > 999){ list.max_id = 0; }
