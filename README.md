@@ -1,14 +1,17 @@
 # Mastodonのクライアントです
 
 ## つかいかた:
-> select <HTL|LTL|FTL>
-> t <トゥート>
-> re <ID> <返信>
-> fav <ID>
-> bt <ID>
-> set vis <direct|private|unlisted|public>
-> pause
-> help
+
+|コマンド| |
+|:----------------------------------------------|-----|
+|```select <HTL|LTL|FTL>```                     |表示するタイムラインを選択|
+|```t <トゥート>```                              |Tootを投稿|
+|```re <ID> <返信>```                           |そのIDのTootに返信する|
+|```fav <ID>```                                |そのIDのTootをお気に入りする|
+|```bt <ID>```                                 |そのIDのTootをブーストする|
+|```set vis <direct|private|unlisted|public>```|投稿の公開範囲を指定する|
+|```pause```                                   |タイムラインの表示更新を停止する(取得は続く)|
+|```help```                                    |help|
 
 ## Installation
 
@@ -16,7 +19,7 @@
 - NodeJS
 
 ```
-git clone
+git clone git@github.com:hs-sh-net/mastodon-client.git
 cd
 cp config.sample.js config.js
 vi config.js # トークンなど
