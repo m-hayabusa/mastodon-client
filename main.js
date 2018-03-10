@@ -158,6 +158,7 @@ let onConnect = function(connection, thisConnection) {
                                                      + "\x1b[44m " + json_fetched.account.display_name +' @'+json_fetched.account.acct + "\x1b[0m");
                                 console.log(msg.content(json_orig.content));
                                 console.log(msg.footer(id,json_orig.created_at));
+                                reader.prompt(true);
                             })
                         } else {
                             // console.log("\x1b[G\x1b[A\x1b[G\x1b[42m" + header + "\x1b[49m\x1b[39m");
