@@ -22,6 +22,19 @@ let list = {}; list.max_id = 0;
 
 let visibility = "public";
 
+let msg = {
+    content: function(content){ return content.replace(/<br \/>/,'\n')
+                                                       .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
+                                                       .replace(/(&lt;)/g, '<')
+                                                       .replace(/(&gt;)/g, '>')
+                                                       .replace(/(&quot;)/g, '"')
+                                                       .replace(/(&#39;)/g, "'")
+                                                       .replace(/(&amp;)/g, '&')
+                                                       .replace(/(&apos;)/g, '\'')},
+    notify:  function(display_name, acct, type, content=''){ return "\x1b[G\x1b[44m" + display_name + " @" + acct + "が\x1b[5m " + type + " \x1b[0m\x1b[44mしました" + (content && ": \n"+content) + "\x1b[0m"},
+    footer:  function(id, created_at) { return "\x1b[G\x1b[47m\x1b[30m " + created_at + ' '.repeat(process.stdout.columns - created_at.length - id.toString().length -2) + id + " \x1b[0m"}
+};
+
 function input() {
     var lines = [];
 
@@ -116,18 +129,17 @@ let onConnect = function(connection, thisConnection) {
                 // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                 if (event == "notification") {
                     if (json.type == 'favourite'){
-                        console.log("\x1b[G\x1b[44m" + json.account.display_name + " : " + json.account.acct + " が\x1b[5mお気に入り\x1b[0m\x1b[44mしました: " + json.status.content.replace(/<br \/>/,'\n').replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'') + "\x1b[0m");
+                        console.log(msg.notify(json.account.display_name, json.account.acct ,"お気に入り", msg.content(json.status.content)));
                     } else if (json.type == 'reblog') {
-                        console.log("\x1b[G\x1b[44m" + json.account.display_name + " : " + json.account.acct + " が\x1b[5mブースト\x1b[0m\x1b[44mしました: " + json.status.content.replace(/<br \/>/,'\n').replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'') + "\x1b[0m");
+                        console.log(msg.notify(json.account.display_name, json.account.acct ,"ブースト", msg.content(json.status.content)));
                     } else if (json.type == 'follow'){
-                        console.log("\x1b[G\x1b[44m" + json.account.display_name + " : " + json.account.acct + " に\x1b[5mフォロー\x1b[0m\x1b[44mされました\x1b[0m");
+                        console.log(msg.notify(json.account.display_name, json.account.acct ,"フォロー"));
                     } else if (json.type == 'mention'){
-                        console.log("\x1b[G\x1b[44m" + json.account.display_name + " : " + json.account.acct + " が\x1b[5m返信\x1b[0m\x1b[44mしました:\n" + json.status.content.replace(/<br \/>/,'\n').replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'') + "\x1b[0m");
+                        console.log(msg.notify(json.account.display_name, json.account.acct ,"返信", msg.content(json.status.content)));
                     } else {
-                        console.log("\x1b[G\x1b[44m" + "何らかの通知があったようです・・・？" + "\x1b[0m");
+                        console.log("\x1b[G\x1b[44m" + "何らかの通知があったようです" + "\x1b[0m");
                     }
-                    console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - json.id.length) + json.id + "\x1b[49m\x1b[39m");
-
+                    console.log(msg.footer(json.id,json.created_at));
                 }
                 if(Active == thisConnection){
                     if (event == "delete") {
@@ -145,41 +157,17 @@ let onConnect = function(connection, thisConnection) {
                         if (json.reblog != null){
                             console.log("\x1b[G" + "\x1b[46m" + header + " \x1b[43m BT "
                                                  + "\x1b[42m " + json.reblog.account.display_name +' @'+json.reblog.account.acct + "\x1b[0m");
-                            console.log(json.reblog.content
-                                            .replace(/<br \/>/,'\n')
-                                            .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
-                                            .replace(/(&lt;)/g, '<')
-                                            .replace(/(&gt;)/g, '>')
-                                            .replace(/(&quot;)/g, '"')
-                                            .replace(/(&#39;)/g, "'")
-                                            .replace(/(&amp;)/g, '&')
-                                            .replace(/(&apos;)/g, '\''));
-                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
+                            console.log(msg.content(json.reblog.content));
+                            console.log(msg.footer(id,json.created_at));
                         } else if (json.sensitive || (json.spoiler_text != null && json.spoiler_text != '')){
                             // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
 
                             console.log("\x1b[G" + "\x1b[46m" + header + "\x1b[0m");
                             console.log("\x1b[47m\x1b[30mCW: \x1b[0m"+json.spoiler_text);
-                            console.log("\x1b[40m\x1b[30m"+json.content
-                                            .replace(/<br \/>/,'\n')
-                                            .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
-                                            .replace(/(&lt;)/g, '<')
-                                            .replace(/(&gt;)/g, '>')
-                                            .replace(/(&quot;)/g, '"')
-                                            .replace(/(&#39;)/g, "'")
-                                            .replace(/(&amp;)/g, '&')
-                                            .replace(/(&apos;)/g, '\'')+"\x1b[0m");
-                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
+                            console.log(msg.content(json.content));
+                            console.log(msg.footer(id,json.created_at));
                         } else if (json.in_reply_to_id != null){
                             let content = json.content
-                                            .replace(/<br \/>/,'\n')
-                                            .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
-                                            .replace(/(&lt;)/g, '<')
-                                            .replace(/(&gt;)/g, '>')
-                                            .replace(/(&quot;)/g, '"')
-                                            .replace(/(&#39;)/g, "'")
-                                            .replace(/(&amp;)/g, '&')
-                                            .replace(/(&apos;)/g, '\'');
                             fetch("https://" + config.domain + "/api/v1/statuses/" + json.in_reply_to_id, {
                                 headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
                                 method: 'GET'
@@ -194,8 +182,8 @@ let onConnect = function(connection, thisConnection) {
                                     // console.log("\x1b[G\x1b[43mOK:Fetch\x1b[49m");
                                     console.log("\x1b[G" + "\x1b[42m" + header + " \x1b[43m >> "
                                                          + "\x1b[44m " + json.account.display_name +' @'+json.account.acct + "\x1b[0m");
-                                    console.log(content);
-                                    console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
+                                    console.log(msg.content(content));
+                                    console.log(msg.footer(id,json.created_at));
 
                                 } else {
                                     console.warn("\x1b[41mNG:Fetch:"+json+"\x1b[0m");
@@ -207,16 +195,8 @@ let onConnect = function(connection, thisConnection) {
                         } else {
                             // console.log("\x1b[G\x1b[A\x1b[G\x1b[42m" + header + "\x1b[49m\x1b[39m");
                             console.log("\x1b[G" + "\x1b[42m" + header + "\x1b[0m");
-                            console.log(json.content
-                                            .replace(/<br \/>/,'\n')
-                                            .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
-                                            .replace(/(&lt;)/g, '<')
-                                            .replace(/(&gt;)/g, '>')
-                                            .replace(/(&quot;)/g, '"')
-                                            .replace(/(&#39;)/g, "'")
-                                            .replace(/(&amp;)/g, '&')
-                                            .replace(/(&apos;)/g, '\''));
-                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
+                            console.log(msg.content(json.content));
+                            console.log(msg.footer(id,json.created_at));
                         }
                     }
                 }
