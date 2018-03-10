@@ -158,6 +158,7 @@ let onConnect = function(connection, thisConnection) {
                                                      + "\x1b[44m " + json_fetched.account.display_name +' @'+json_fetched.account.acct + "\x1b[0m");
                                 console.log(msg.content(json_orig.content));
                                 console.log(msg.footer(id,json_orig.created_at));
+                                reader.prompt(true);
                             })
                         } else {
                             // console.log("\x1b[G\x1b[A\x1b[G\x1b[42m" + header + "\x1b[49m\x1b[39m");
@@ -204,10 +205,12 @@ function fetchStatus(id, callback){
             callback(json_fetched);
         } else {
             console.warn("\x1b[41mNG:Fetch:"+json+"\x1b[0m");
+            reader.prompt(true);
         }
     }).catch(function(error) {
         console.warn(error);
         console.warn("\x1b[41mNG:Fetch:SERVER\x1b[0m");
+        reader.prompt(true);
     });
 }
 
@@ -224,11 +227,14 @@ function fav(id) {
     }).then(function(json) {
         if (json["id"]) {
             console.log("\x1b[G\x1b[43mOK:Fav\x1b[0m");
+            reader.prompt(true);
         } else {
             console.warn("\x1b[G\x1b[41mNG:Fav:"+json+"\x1b[0m");
+            reader.prompt(true);
         }
     }).catch(function(error) {
         console.warn("\x1b[G\x1b[41mNG:Fav:SERVER\x1b[0m");
+        reader.prompt(true);
     });
 }
 
@@ -245,11 +251,14 @@ function rt(id) {
     }).then(function(json) {
         if (json["id"]) {
             console.log("\x1b[G\x1b[43mOK:RT\x1b[0m");
+            reader.prompt(true);
         } else {
             console.warn("\x1b[G\x1b[41mNG:RT:"+json+"\x1b[0m");
+            reader.prompt(true);
         }
     }).catch(function(error) {
         console.warn("\x1b[G\x1b[41mNG:RT:SERVER\x1b[0m");
+        reader.prompt(true);
     });
 }
 
@@ -279,11 +288,14 @@ function post(value, option = {}, visibility = "public", force) {
         }).then(function(json) {
             if (json["id"]) {
                 console.log("\x1b[G\x1b[43mOK:POST\x1b[49m");
+                reader.prompt(true);
             } else {
                 console.warn("\x1b[41mNG:POST:"+json+"\x1b[49m");
+                reader.prompt(true);
             }
         }).catch(function(error) {
             console.warn("\x1b[41mNG:POST:SERVER\x1b[49m");
+            reader.prompt(true);
         });
     }
 }
