@@ -136,7 +136,10 @@ let onConnect = function(connection, thisConnection) {
                     } else if (event == "update") {
                         // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                         if (list.max_id > 999){ list.max_id = 0; }
-                        list[list.max_id] = json.id;list.max_id = list.max_id + 1;
+                        list[list.max_id] = json.id;
+                        let id = list.max_id;
+                        list.max_id = list.max_id + 1;
+
                         let header = json.account.display_name +' @'+json.account.acct;
 
                         if (json.reblog != null){
@@ -151,7 +154,7 @@ let onConnect = function(connection, thisConnection) {
                                             .replace(/(&#39;)/g, "'")
                                             .replace(/(&amp;)/g, '&')
                                             .replace(/(&apos;)/g, '\''));
-                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - list.max_id.toString().length -1) + list.max_id.toString() + " \x1b[0m");
+                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
                         } else if (json.sensitive || (json.spoiler_text != null && json.spoiler_text != '')){
                             // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
 
@@ -166,7 +169,7 @@ let onConnect = function(connection, thisConnection) {
                                             .replace(/(&#39;)/g, "'")
                                             .replace(/(&amp;)/g, '&')
                                             .replace(/(&apos;)/g, '\'')+"\x1b[0m");
-                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - list.max_id.toString().length -1) + list.max_id.toString() + " \x1b[0m");
+                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
                         } else if (json.in_reply_to_id != null){
                             let content = json.content
                                             .replace(/<br \/>/,'\n')
@@ -192,7 +195,7 @@ let onConnect = function(connection, thisConnection) {
                                     console.log("\x1b[G" + "\x1b[42m" + header + " \x1b[43m >> "
                                                          + "\x1b[44m " + json.account.display_name +' @'+json.account.acct + "\x1b[0m");
                                     console.log(content);
-                                    console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - list.max_id.toString().length -1) + list.max_id.toString() + " \x1b[0m");
+                                    console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
 
                                 } else {
                                     console.warn("\x1b[41mNG:Fetch:"+json+"\x1b[0m");
@@ -213,9 +216,8 @@ let onConnect = function(connection, thisConnection) {
                                             .replace(/(&#39;)/g, "'")
                                             .replace(/(&amp;)/g, '&')
                                             .replace(/(&apos;)/g, '\''));
-                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - list.max_id.toString().length -1) + list.max_id.toString() + " \x1b[0m");
+                            console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - id.toString().length -1) + id.toString() + " \x1b[0m");
                         }
-                        // console.log("\x1b[G\x1b[47m\x1b[30m" + json.created_at + ' '.repeat(process.stdout.columns - json.created_at.length - list.max_id.toString().length -1) + list.max_id.toString() + " \x1b[49m\x1b[39m");
                     }
                 }
                 reader.prompt(true);
