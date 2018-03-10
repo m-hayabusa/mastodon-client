@@ -54,31 +54,17 @@ function input() {
                 console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
             }
         } else if (line.match(/^re /)){
-            fetch("https://" + config.domain + "/api/v1/statuses/" + list[line.replace(/^re /,'').match(/^(\d*)/)[0]], {
-                headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
-                method: 'GET'
-            }).then(function(response) {
-                if(response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error();
-                }
-            }).then(function(json) {
-                if (json["id"]) {
-                    console.log("\x1b[G\x1b[43mOK:Fetch\x1b[49m");
-                    post('@'+json.account.acct + ' ' + line.replace(/^re \d* /, ''), {in_reply_to_id:list[line.replace(/^re /,'').match(/^(\d*)/)[0]]}, visibility);
-                    reader.prompt(true);
-                } else {
-                    console.warn("\x1b[41mNG:Fetch:"+json+"\x1b[49m");
-                }
-            }).catch(function(error) {
-                console.warn("\x1b[41mNG:Fetch:SERVER\x1b[49m");
+            fetchStatus(list[line.replace(/^re /,'').match(/^(\d*)/)[0]],function(json){
+                post('@'+json.account.acct + ' ' + line.replace(/^re \d* /, ''), {in_reply_to_id:list[line.replace(/^re /,'').match(/^(\d*)/)[0]]}, visibility);
+                reader.prompt(true);
             });
         } else if (line.match(/^select /)) {
             if (line.replace(/^select /,"") == 'FTL' && isConnected['FTL'] == false){
                 client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
             } else if (line.replace(/^select /,"") == 'LTL' && isConnected['LTL'] == false){
                 client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
+            } else if (line.replace(/^select /,"") == 'HTL' && isConnected['HTL'] == false){
+                client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
             }
             Active = line.replace(/^select /,"");
             console.log('\x1b[G' + "\x1b[42m" + Active + 'にストリームを切り替えました\x1b[49m');
@@ -167,31 +153,13 @@ let onConnect = function(connection, thisConnection) {
                             console.log(msg.content(json.content));
                             console.log(msg.footer(id,json.created_at));
                         } else if (json.in_reply_to_id != null){
-                            let content = json.content
-                            fetch("https://" + config.domain + "/api/v1/statuses/" + json.in_reply_to_id, {
-                                headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
-                                method: 'GET'
-                            }).then(function(response) {
-                                if(response.ok) {
-                                    return response.json();
-                                } else {
-                                    throw new Error();
-                                }
-                            }).then(function(json) {
-                                if (json["id"]) {
-                                    // console.log("\x1b[G\x1b[43mOK:Fetch\x1b[49m");
-                                    console.log("\x1b[G" + "\x1b[42m" + header + " \x1b[43m >> "
-                                                         + "\x1b[44m " + json.account.display_name +' @'+json.account.acct + "\x1b[0m");
-                                    console.log(msg.content(content));
-                                    console.log(msg.footer(id,json.created_at));
-
-                                } else {
-                                    console.warn("\x1b[41mNG:Fetch:"+json+"\x1b[0m");
-                                }
-                            }).catch(function(error) {
-                                console.warn("\x1b[41mNG:Fetch:SERVER\x1b[0m");
-                            });
-
+                            let json_orig = json;
+                            fetchStatus(json.in_reply_to_id, function(json_fetched){
+                                console.log("\x1b[G" + "\x1b[42m" + header + " \x1b[43m >> "
+                                                     + "\x1b[44m " + json_fetched.account.display_name +' @'+json_fetched.account.acct + "\x1b[0m");
+                                console.log(msg.content(json_orig.content));
+                                console.log(msg.footer(id,json_orig.created_at));
+                            })
                         } else {
                             // console.log("\x1b[G\x1b[A\x1b[G\x1b[42m" + header + "\x1b[49m\x1b[39m");
                             console.log("\x1b[G" + "\x1b[42m" + header + "\x1b[0m");
@@ -222,6 +190,28 @@ client['FTL'].on('connectFailed', function(error) { console.log('Connect Error: 
 client['FTL'].on('connect', function(connection){onConnect(connection,'FTL');});
 
 // ここからいろいろ
+function fetchStatus(id, callback){
+    fetch("https://" + config.domain + "/api/v1/statuses/" + id, {
+        headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
+        method: 'GET'
+    }).then(function(response) {
+        if(response.ok) {
+            return response.json();
+        } else {
+            throw new Error();
+        }
+    }).then(function(json_fetched) {
+        if (json_fetched["id"]) {
+            callback(json_fetched);
+        } else {
+            console.warn("\x1b[41mNG:Fetch:"+json+"\x1b[0m");
+        }
+    }).catch(function(error) {
+        console.warn(error);
+        console.warn("\x1b[41mNG:Fetch:SERVER\x1b[0m");
+    });
+}
+
 function fav(id) {
     fetch("https://" + config.domain + "/api/v1/statuses/"+id+"/favourite", {
         headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
