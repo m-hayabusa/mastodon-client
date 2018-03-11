@@ -157,7 +157,6 @@ let onConnect = function(connection, thisConnection) {
                 let id = '';
                 if (event == "notification") {
                     if (json.type == 'favourite'){
-                        console.log("\x1b[G\x1b[41m");console.log(json.status.content);console.log("\x1b[G\x1b[49m");
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"お気に入り", msg.content(json.status.content)));
                     } else if (json.type == 'reblog') {
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"ブースト", msg.content(json.status.content)));
