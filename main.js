@@ -32,7 +32,7 @@ let msg = {
                                               .replace(/(&amp;)/g, '&')
                                               .replace(/(&apos;)/g, '\'')},
     notify:  function(display_name, acct, type, content=''){ return "\x1b[G\x1b[44m" + display_name + " @" + acct + "が\x1b[5m " + type + " \x1b[0m\x1b[44mしました" + (content && ": \n"+content) + "\x1b[0m"},
-    footer:  function(id, created_at) { return "\x1b[G\x1b[47m\x1b[30m " + created_at + ' '.repeat(process.stdout.columns - created_at.length - id.toString().length -2) + id + " \x1b[0m"}
+    footer:  function(id, created_at) { return "\x1b[G\x1b[47m\x1b[30m " + id + ' '.repeat(process.stdout.columns - created_at.length - id.toString().length -2) + created_at + " \x1b[0m"}
 };
 
 function input() {
@@ -121,7 +121,7 @@ let onConnect = function(connection, thisConnection) {
                 // console.log("\x1b[G\x1b[41m");console.log(message);console.log("\x1b[G\x1b[49m");
                 let json = JSON.parse(JSON.parse(message.utf8Data).payload);
                 let event = JSON.parse(message.utf8Data).event;
-                let id = json.id;
+                let id = '';
                 // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                 if (event == "notification") {
                     if (json.type == 'favourite'){
