@@ -152,11 +152,9 @@ let onConnect = function(connection, thisConnection) {
     connection.on('message', function(message) {
         try {
             if (message.type === 'utf8') {
-                // console.log("\x1b[G\x1b[41m");console.log(message);console.log("\x1b[G\x1b[49m");
                 let json = JSON.parse(JSON.parse(message.utf8Data).payload);
                 let event = JSON.parse(message.utf8Data).event;
                 let id = '';
-                // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                 if (event == "notification") {
                     if (json.type == 'favourite'){
                         console.log("\x1b[G\x1b[41m");console.log(json.status.content);console.log("\x1b[G\x1b[49m");
@@ -180,7 +178,6 @@ let onConnect = function(connection, thisConnection) {
                     if (event == "delete") {
                         console.log("\x1b[G\x1b[45m" + json + "番のTootが削除されました" + "\x1b[0m");
                     } else if (event == "update") {
-                        // console.log("\x1b[G\x1b[41m");console.log(json.content);console.log("\x1b[G\x1b[49m");
                         if (list.max_id > 999){ list.max_id = 0; }
                         list[list.max_id] = json.id;
                         let id = list.max_id;
@@ -194,8 +191,6 @@ let onConnect = function(connection, thisConnection) {
                             console.log(msg.content(json.reblog.content));
                             console.log(msg.footer(id,json.created_at));
                         } else if (json.sensitive || (json.spoiler_text != null && json.spoiler_text != '')){
-                            // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
-
                             console.log("\x1b[G" + "\x1b[46m" + header + "\x1b[0m");
                             console.log("\x1b[47m\x1b[30mCW: \x1b[0m"+json.spoiler_text);
                             console.log(msg.content(json.content));
@@ -210,7 +205,6 @@ let onConnect = function(connection, thisConnection) {
                                 reader.prompt(true);
                             })
                         } else {
-                            // console.log("\x1b[G\x1b[A\x1b[G\x1b[42m" + header + "\x1b[49m\x1b[39m");
                             console.log("\x1b[G" + "\x1b[42m" + header + "\x1b[0m");
                             console.log(msg.content(json.content));
                             console.log(msg.footer(id,json.created_at));
