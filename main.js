@@ -35,67 +35,100 @@ let msg = {
     footer:  function(id, created_at) { return "\x1b[G\x1b[47m\x1b[30m " + id + ' '.repeat(process.stdout.columns - created_at.length - id.toString().length -2) + created_at + " \x1b[0m"}
 };
 
+function commands(line) {
+    if (line == '') {
+
+    } else if (line.match(/^(toot|t)/)) {
+        post(line.replace(/^(toot|t)/, ""), {}, visibility);
+    } else if (line.match(/^fav /)) {
+        if (list[line.replace(/^fav /, "")] != null) {
+            fav(list[line.replace(/^fav /, "")]);
+        } else {
+            console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
+        }
+    } else if (line.match(/^bt /)) {
+        if (list[line.replace(/^bt /, "")] != null) {
+            rt(list[line.replace(/^bt /, "")]);
+        } else {
+            console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
+        }
+    } else if (line.match(/^re /)) {
+        fetchStatus(list[line.replace(/^re /, '').match(/^(\d*)/)[0]], function (json) {
+            post('@' + json.account.acct + ' ' + line.replace(/^re \d* /, ''), {in_reply_to_id: list[line.replace(/^re /, '').match(/^(\d*)/)[0]]}, visibility);
+            reader.prompt(true);
+        });
+    } else if (line.match(/^select /)) {
+        let input = line.replace(/^select /, "").toUpperCase();
+        if (input.match(/^(HTL|LTL|FTL)$/)) {
+            if (input == 'FTL' && isConnected['FTL'] == false) {
+                client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
+            } else if (input == 'LTL' && isConnected['LTL'] == false) {
+                client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
+            } else if (input == 'HTL' && isConnected['HTL'] == false) {
+                client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
+            }
+            Active = input;
+            console.log('\x1b[G' + "\x1b[42m" + Active + 'にストリームを切り替えました\x1b[49m');
+        } else {
+            console.log("\x1b[G\x1b[41m> select (HTL|LTL|FTL)\x1b[0m");
+        }
+    } else if (line.match(/^pause/)) {
+        Active = false;
+        console.log('\x1b[G\x1b[46mストリームの表示を停止します\x1b[49m');
+    } else if (line.match(/^set /)) {
+        line = line.replace(/^set /, '');
+        if (line.match(/^vis /)) {
+            visibility = line.replace(/^vis /, '');
+        }
+    } else if (line.match(/^help/)) {
+        console.log("\x1b[Gつかいかた: ")
+        console.log("\x1b[G > select <HTL|LTL|FTL>");
+        console.log("\x1b[G > t <トゥート>");
+        console.log("\x1b[G > re <ID> <返信>");
+        console.log("\x1b[G > fav <ID>");
+        console.log("\x1b[G > bt <ID>");
+        console.log("\x1b[G > set vis <direct|private|unlisted|public>");
+        console.log("\x1b[G > exit");
+        console.log("\x1b[G > pause");
+    } else if (line.match(/^exit/)) {
+        console.log('\x1b[G\x1b[46m終了します\x1b[49m');
+        process.exit(0);
+    } else {
+        console.log("\x1b[G\x1b[41m不明なコマンドです\x1b[49m");
+    }
+}
+
 function input() {
-    var lines = [];
+    let lines = '';
 
     reader.on('line', function(line) {
-        if (line.match(/^(toot |t )/)){
-            post(line.replace(/^(toot |t )/, ""), {}, visibility);
-        } else if (line.match(/^fav /)){
-            if (list[line.replace(/^fav /, "")] != null){
-                fav(list[line.replace(/^fav /, "")]);
+        if (line.match(/\\$/)){
+            if (lines == '') {
+                lines += line.replace(/\\$/,'');
             } else {
-                console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
+                lines += '\n'+line.replace(/\\$/,'');
             }
-        } else if (line.match(/^bt /)){
-            if (list[line.replace(/^bt /, "")] != null){
-                rt(list[line.replace(/^bt /, "")]);
+        } else {
+            if(lines == '') {
+                commands(line);
             } else {
-                console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
+                lines += '\n'+line.replace(/\\$/,'');
+                commands(lines);
+                lines = '';
             }
-        } else if (line.match(/^re /)){
-            fetchStatus(list[line.replace(/^re /,'').match(/^(\d*)/)[0]],function(json){
-                post('@'+json.account.acct + ' ' + line.replace(/^re \d* /, ''), {in_reply_to_id:list[line.replace(/^re /,'').match(/^(\d*)/)[0]]}, visibility);
+        }
+        reader.prompt(true);
+    });
+
+    reader.on('SIGINT', () => {
+        if (lines == '') {
+            reader.question('終了しますか？ [Y/n] >', (answer) => {
+                if (answer == '' || answer.match(/^y(es)?$/i)) process.exit(0);
                 reader.prompt(true);
             });
-        } else if (line.match(/^select /)) {
-            let input = line.replace(/^select /,"").toUpperCase();
-            if (input.match(/^(HTL|LTL|FTL)$/)){
-                if (input == 'FTL' && isConnected['FTL'] == false){
-                    client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
-                } else if (input == 'LTL' && isConnected['LTL'] == false){
-                    client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
-                } else if (input == 'HTL' && isConnected['HTL'] == false){
-                    client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
-                }
-                Active = input;
-                console.log('\x1b[G' + "\x1b[42m" + Active + 'にストリームを切り替えました\x1b[49m');
-            } else {
-                console.log("\x1b[G\x1b[41m> select (HTL|LTL|FTL)\x1b[0m");
-            }
-        } else if (line.match(/^pause/)) {
-            Active = false;
-            console.log('\x1b[G\x1b[46mストリームの表示を停止します\x1b[49m');
-        } else if (line.match(/^set /)) {
-            line = line.replace(/^set /,'');
-            if (line.match(/^vis /)) {
-                visibility = line.replace(/^vis /,'');
-            }
-        } else if (line.match(/^help/)) {
-            console.log("\x1b[Gつかいかた: ")
-            console.log("\x1b[G > select <HTL|LTL|FTL>");
-            console.log("\x1b[G > t <トゥート>");
-            console.log("\x1b[G > re <ID> <返信>");
-            console.log("\x1b[G > fav <ID>");
-            console.log("\x1b[G > bt <ID>");
-            console.log("\x1b[G > set vis <direct|private|unlisted|public>");
-            console.log("\x1b[G > exit");
-            console.log("\x1b[G > pause");
-        } else if (line.match(/^exit/)) {
-            console.log('\x1b[G\x1b[46m終了します\x1b[49m');
-            process.exit(0);
         } else {
-            console.log("\x1b[G\x1b[41m不明なコマンドです\x1b[49m");
+            lines = '';
+            console.log("入力バッファをクリアしました");
         }
         reader.prompt(true);
     });
