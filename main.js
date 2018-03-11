@@ -23,7 +23,8 @@ let list = {}; list.max_id = 0;
 let visibility = "public";
 
 let msg = {
-    content: function(content){ return content.replace(/<br \/>/,'\n')
+    content: function(content){ return content.replace(/<br \/>/g,'\n')
+                                              .replace(/<\/p><p>/g,'\n')
                                               .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
                                               .replace(/(&lt;)/g, '<')
                                               .replace(/(&gt;)/g, '>')
@@ -158,6 +159,7 @@ let onConnect = function(connection, thisConnection) {
                 // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                 if (event == "notification") {
                     if (json.type == 'favourite'){
+                        console.log("\x1b[G\x1b[41m");console.log(json.status.content);console.log("\x1b[G\x1b[49m");
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"お気に入り", msg.content(json.status.content)));
                     } else if (json.type == 'reblog') {
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"ブースト", msg.content(json.status.content)));
@@ -178,7 +180,7 @@ let onConnect = function(connection, thisConnection) {
                     if (event == "delete") {
                         console.log("\x1b[G\x1b[45m" + json + "番のTootが削除されました" + "\x1b[0m");
                     } else if (event == "update") {
-                        // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
+                        // console.log("\x1b[G\x1b[41m");console.log(json.content);console.log("\x1b[G\x1b[49m");
                         if (list.max_id > 999){ list.max_id = 0; }
                         list[list.max_id] = json.id;
                         let id = list.max_id;
