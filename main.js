@@ -116,6 +116,7 @@ let onConnect = function(connection, thisConnection) {
                 // console.log("\x1b[G\x1b[41m");console.log(message);console.log("\x1b[G\x1b[49m");
                 let json = JSON.parse(JSON.parse(message.utf8Data).payload);
                 let event = JSON.parse(message.utf8Data).event;
+                let id = json.id;
                 // console.log("\x1b[G\x1b[41m");console.log(json);console.log("\x1b[G\x1b[49m");
                 if (event == "notification") {
                     if (json.type == 'favourite'){
@@ -125,11 +126,15 @@ let onConnect = function(connection, thisConnection) {
                     } else if (json.type == 'follow'){
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"フォロー"));
                     } else if (json.type == 'mention'){
+                        if (list.max_id > 999){ list.max_id = 0; }
+                        list[list.max_id] = json.status.id;
+                        id = list.max_id;
+                        list.max_id = list.max_id + 1;
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"返信", msg.content(json.status.content)));
                     } else {
                         console.log("\x1b[G\x1b[44m" + "何らかの通知があったようです" + "\x1b[0m");
                     }
-                    console.log(msg.footer(json.id,json.created_at));
+                    console.log(msg.footer(id,json.created_at));
                 }
                 if(Active == thisConnection){
                     if (event == "delete") {
