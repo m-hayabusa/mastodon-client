@@ -59,15 +59,20 @@ function input() {
                 reader.prompt(true);
             });
         } else if (line.match(/^select /)) {
-            if (line.replace(/^select /,"") == 'FTL' && isConnected['FTL'] == false){
-                client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
-            } else if (line.replace(/^select /,"") == 'LTL' && isConnected['LTL'] == false){
-                client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
-            } else if (line.replace(/^select /,"") == 'HTL' && isConnected['HTL'] == false){
-                client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
+            let input = line.replace(/^select /,"").toUpperCase();
+            if (input.match(/^(HTL|LTL|FTL)$/)){
+                if (input == 'FTL' && isConnected['FTL'] == false){
+                    client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
+                } else if (input == 'LTL' && isConnected['LTL'] == false){
+                    client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
+                } else if (input == 'HTL' && isConnected['HTL'] == false){
+                    client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
+                }
+                Active = input;
+                console.log('\x1b[G' + "\x1b[42m" + Active + 'にストリームを切り替えました\x1b[49m');
+            } else {
+                console.log("\x1b[G\x1b[41m> select (HTL|LTL|FTL)\x1b[0m");
             }
-            Active = line.replace(/^select /,"");
-            console.log('\x1b[G' + "\x1b[42m" + Active + 'にストリームを切り替えました\x1b[49m');
         } else if (line.match(/^pause/)) {
             Active = false;
             console.log('\x1b[G\x1b[46mストリームの表示を停止します\x1b[49m');
