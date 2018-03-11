@@ -11,6 +11,7 @@
 |```bt <ID>```                                 |そのIDのTootをブーストする|
 |```set vis <direct/private/unlisted/public>```|投稿の公開範囲を指定する|
 |```pause```                                   |タイムラインの表示更新を停止する(取得は続く・通知は表示される)|
+|```exit```                                   |終了する|
 |```help```                                    |help|
 
 ## Installation

@@ -84,7 +84,11 @@ function input() {
             console.log("\x1b[G > fav <ID>");
             console.log("\x1b[G > bt <ID>");
             console.log("\x1b[G > set vis <direct|private|unlisted|public>");
+            console.log("\x1b[G > exit");
             console.log("\x1b[G > pause");
+        } else if (line.match(/^exit/)) {
+            console.log('\x1b[G\x1b[46m終了します\x1b[49m');
+            process.exit(0);
         } else {
             console.log("\x1b[G\x1b[41m不明なコマンドです\x1b[49m");
         }
