@@ -1,5 +1,3 @@
-let is_running = 1;
-let eti = 0;
 let config = require('./config');
 let fetch = require('node-fetch');
 
@@ -304,7 +302,7 @@ function rt(id) {
     });
 }
 
-function post(value, option = {}, visibility = "public", force) {
+function post(value, option = {}, visibility = "public") {
     var optiondata = {
         status: value,
         visibility: visibility
@@ -316,28 +314,26 @@ function post(value, option = {}, visibility = "public", force) {
     if (option.in_reply_to_id) {
         optiondata.in_reply_to_id = option.in_reply_to_id;
     }
-    if (is_running || force) {
-        fetch("https://" + config.domain + "/api/v1/statuses", {
-            headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
-            method: 'POST',
-            body: JSON.stringify(optiondata)
-        }).then(function(response) {
-            if(response.ok) {
-                return response.json();
-            } else {
-                throw new Error();
-            }
-        }).then(function(json) {
-            if (json["id"]) {
-                console.log("\x1b[G\x1b[43mOK:POST\x1b[49m");
-                reader.prompt(true);
-            } else {
-                console.warn("\x1b[41mNG:POST:"+json+"\x1b[49m");
-                reader.prompt(true);
-            }
-        }).catch(function(error) {
-            console.warn("\x1b[41mNG:POST:SERVER\x1b[49m");
+    fetch("https://" + config.domain + "/api/v1/statuses", {
+        headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
+        method: 'POST',
+        body: JSON.stringify(optiondata)
+    }).then(function(response) {
+        if(response.ok) {
+            return response.json();
+        } else {
+            throw new Error();
+        }
+    }).then(function(json) {
+        if (json["id"]) {
+            console.log("\x1b[G\x1b[43mOK:POST\x1b[49m");
             reader.prompt(true);
-        });
-    }
+        } else {
+            console.warn("\x1b[41mNG:POST:"+json+"\x1b[49m");
+            reader.prompt(true);
+        }
+    }).catch(function(error) {
+        console.warn("\x1b[41mNG:POST:SERVER\x1b[49m");
+        reader.prompt(true);
+    });
 }
