@@ -14,7 +14,7 @@ let client = {
 };
 
 let isConnected = {HTL: false, LTL: false, FTL: false };
-let Active = "";
+let Active = {HTL: false, LTL: false, FTL: false };
 let list = new Map();
 let log = new Map();
 
@@ -64,16 +64,35 @@ function commands(line) {
         }
     } else if (line.match(/^select /)) {
         let input = line.replace(/^select /, "").toUpperCase();
-        if (input.match(/^(HTL|LTL|FTL)$/)) {
-            if (input == 'FTL' && isConnected['FTL'] == false) {
-                client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
-            } else if (input == 'LTL' && isConnected['LTL'] == false) {
-                client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
-            } else if (input == 'HTL' && isConnected['HTL'] == false) {
-                client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
+        if (input.match(/(HTL|LTL|FTL)/)) {
+            if (input.match(/FTL/)) {
+                Active.FTL = true;
+                if (isConnected['FTL'] === false) {
+                    client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
+                }
+            } else {
+                Active.FTL = true;
             }
-            Active = input;
-            console.log('\x1b[G' + "\x1b[42m" + Active + 'にストリームを切り替えました\x1b[49m');
+
+            if (input.match(/LTL/)) {
+                Active.LTL = true;
+                if (isConnected['LTL'] === false) {
+                    client['LTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public:local");
+                }
+            } else {
+                Active.LTL = false;
+            }
+
+            if (input.match(/HTL/)) {
+                Active.HTL = true;
+                if (isConnected['HTL'] === false) {
+                    client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
+                }
+            } else {
+                Active.HTL = false;
+            }
+
+            console.log('\x1b[G' + "\x1b[42m" + input + 'にストリームを切り替えました\x1b[49m');
         } else {
             console.log("\x1b[G\x1b[41m> select (HTL|LTL|FTL)\x1b[0m");
         }
@@ -177,7 +196,7 @@ let onConnect = function(connection, thisConnection) {
                     }
                     console.log(msg.footer(id,json.created_at));
                 }
-                if(Active == thisConnection){
+                if(Active[thisConnection] == true){
                     if (event == "delete") {
                         id = JSON.parse(message.utf8Data).payload;
                         console.log("\x1b[G\x1b[45m" + id + "番のTootが削除されました" + "\x1b[0m");
@@ -232,7 +251,7 @@ console.log('\n'.repeat(process.stdout.rows));
 client['HTL'].on('connectFailed', function(error) { console.log('Connect Error: ' + error.toString());});
 client['HTL'].on('connect', function(connection){onConnect(connection,'HTL');});
 client['HTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=user");
-Active = 'HTL';
+Active.HTL = true;
 
 client['LTL'].on('connectFailed', function(error) { console.log('Connect Error: ' + error.toString());});
 client['LTL'].on('connect', function(connection){onConnect(connection,'LTL');});
