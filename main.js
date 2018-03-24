@@ -15,7 +15,8 @@ let client = {
 
 let isConnected = {HTL: false, LTL: false, FTL: false };
 let Active = "";
-let list = {}; list.max_id = 0;
+let list = new Map();
+let log = new Map();
 
 
 let visibility = "public";
@@ -40,22 +41,27 @@ function commands(line) {
     } else if (line.match(/^(toot|t)/)) {
         post(line.replace(/^(toot|t)/, ""), {}, visibility);
     } else if (line.match(/^fav /)) {
-        if (list[line.replace(/^fav /, "")] != null) {
-            fav(list[line.replace(/^fav /, "")]);
+        let id = line.replace(/^fav /, "");
+        if (list.has(id)) {
+            fav(log.get(list.get(id)).id);
         } else {
             console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
         }
     } else if (line.match(/^bt /)) {
-        if (list[line.replace(/^bt /, "")] != null) {
-            rt(list[line.replace(/^bt /, "")]);
+        let id = line.replace(/^bt /, "");
+        if (list.has(id)) {
+            rt(log.get(list.get(id)).id);
         } else {
             console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
         }
     } else if (line.match(/^re /)) {
-        fetchStatus(list[line.replace(/^re /, '').match(/^(\d*)/)[0]], function (json) {
-            post('@' + json.account.acct + ' ' + line.replace(/^re \d* /, ''), {in_reply_to_id: list[line.replace(/^re /, '').match(/^(\d*)/)[0]]}, visibility);
-            reader.prompt(true);
-        });
+        let id = line.replace(/^re /, '').match(/^(\d*)/)[0];
+        if (list.has(id) && log.has(list.get(id))) {
+            let acct = log.get(list.get(id)).account.acct;
+            post('@' + acct + ' ' + line.replace(/^re \d* /, ''), {in_reply_to_id: list.get(id)}, visibility);
+        } else {
+            console.warn("\x1b[41mNG:Re:wrongID\x1b[49m");
+        }
     } else if (line.match(/^select /)) {
         let input = line.replace(/^select /, "").toUpperCase();
         if (input.match(/^(HTL|LTL|FTL)$/)) {
@@ -161,10 +167,10 @@ let onConnect = function(connection, thisConnection) {
                     } else if (json.type == 'follow'){
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"フォロー"));
                     } else if (json.type == 'mention'){
-                        if (list.max_id > 999){ list.max_id = 0; }
-                        list[list.max_id] = json.status.id;
-                        id = list.max_id;
-                        list.max_id = list.max_id + 1;
+                        log.set(json.id, json);
+                        let id = log.size +'';
+                        list.set(id, json.id);
+
                         console.log(msg.notify(json.account.display_name, json.account.acct ,"返信", msg.content(json.status.content)));
                     } else {
                         console.log("\x1b[G\x1b[44m" + "何らかの通知があったようです" + "\x1b[0m");
@@ -173,12 +179,17 @@ let onConnect = function(connection, thisConnection) {
                 }
                 if(Active == thisConnection){
                     if (event == "delete") {
-                        console.log("\x1b[G\x1b[45m" + json + "番のTootが削除されました" + "\x1b[0m");
-                    } else if (event == "update") {
-                        if (list.max_id > 999){ list.max_id = 0; }
-                        list[list.max_id] = json.id;
-                        let id = list.max_id;
-                        list.max_id = list.max_id + 1;
+                        id = JSON.parse(message.utf8Data).payload;
+                        console.log("\x1b[G\x1b[45m" + id + "番のTootが削除されました" + "\x1b[0m");
+                        if (log.has(id)){
+                            let data = log.get(id);
+                            console.log(msg.content(data.content));
+                            console.log(msg.footer('',data.created_at));
+                        }
+                    } else if (event == "update" && !log.has(json.id)) {
+                        log.set(json.id, json);
+                        let id = log.size +'';
+                        list.set(id, json.id);
 
                         let header = json.account.display_name +' @'+json.account.acct;
 
