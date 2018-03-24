@@ -52,7 +52,7 @@ function commands(line) {
         if (list.has(id)) {
             rt(log.get(list.get(id)).id);
         } else {
-            console.warn("\x1b[41mNG:Fav:wrongID\x1b[49m");
+            console.warn("\x1b[41mNG:BT:wrongID\x1b[49m");
         }
     } else if (line.match(/^re /)) {
         let id = line.replace(/^re /, '').match(/^(\d*)/)[0];
