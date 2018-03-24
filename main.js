@@ -117,6 +117,12 @@ function commands(line) {
     } else if (line.match(/^exit/)) {
         console.log('\x1b[G\x1b[46m終了します\x1b[49m');
         process.exit(0);
+    } else if (line.match(/^f /)) {
+        try {
+            console.log(eval(line.replace(/^f /, '')));
+        } catch(e) {
+            console.log(e);
+        }
     } else {
         console.log("\x1b[G\x1b[41m不明なコマンドです\x1b[49m");
     }
