@@ -62,6 +62,13 @@ function commands(line) {
         } else {
             console.warn("\x1b[41mNG:Re:wrongID\x1b[49m");
         }
+    } else if (line.match(/^del /)) {
+        let id = line.replace(/^del /, "");
+        if (list.has(id)) {
+            del(log.get(list.get(id)).id);
+        } else {
+            console.warn("\x1b[41mNG:Del:wrongID\x1b[49m");
+        }
     } else if (line.match(/^select /)) {
         let input = line.replace(/^select /, "").toUpperCase();
         if (input.match(/(HTL|LTL|FTL)/)) {
@@ -286,6 +293,24 @@ function fetchStatus(id, callback){
     }).catch(function(error) {
         console.warn(error);
         console.warn("\x1b[41mNG:Fetch:SERVER\x1b[0m");
+        reader.prompt(true);
+    });
+}
+
+function del(id) {
+    fetch("https://" + config.domain + "/api/v1/statuses/"+id, {
+        headers: {'content-type': 'application/json', 'Authorization': 'Bearer '+config.token},
+        method: 'DELETE'
+    }).then(function(response) {
+        if(response.ok) {
+            console.log("\x1b[G\x1b[43mOK:Del\x1b[0m");
+            reader.prompt(true);
+            return response.json();
+        } else {
+            throw new Error();
+        }
+    }).catch(function(error) {
+        console.warn("\x1b[G\x1b[41mNG:Del\x1b[0m");
         reader.prompt(true);
     });
 }
