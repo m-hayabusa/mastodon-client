@@ -22,7 +22,7 @@ let log = new Map();
 let visibility = "public";
 
 let msg = {
-    content: function(content){ return content.replace(/<br \/>/g,'\n')
+    content: function(content){ return content.replace(/<br( \/)?>/g,'\n')
                                               .replace(/<\/p><p>/g,'\n')
                                               .replace(/<("[^"]*"|'[^']*'|[^'">])*>/g,'')
                                               .replace(/(&lt;)/g, '<')
