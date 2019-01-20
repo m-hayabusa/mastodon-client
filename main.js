@@ -78,7 +78,7 @@ function commands(line) {
                     client['FTL'].connect("wss://" + config.domain + "/api/v1/streaming/?access_token=" + config.token + "&stream=public");
                 }
             } else {
-                Active.FTL = true;
+                Active.FTL = false;
             }
 
             if (input.match(/LTL/)) {
