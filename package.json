@@ -1,11 +1,11 @@
 {
   "name": "hayabusa_Mastodon_client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple Mastodon Client",
   "main": "main.js",
   "dependencies": {
-    "node-fetch": "^1.7.3",
-    "websocket": "^1.0.25"
+    "node-fetch": "^2.6.1",
+    "websocket": "^1.0.32"
   },
   "devDependencies": {},
   "scripts": {
